@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Media;
 
 namespace Tetris;
 
@@ -11,6 +13,17 @@ public class Game1 : Game
     private List<Tetromino> _blockList = Tetromino.ReadFromJSON();
     
     private GameState _currentState = GameState.TitleScreen;
+
+    private Song _backgroundMusic;
+    private Song _gameOver;
+
+    private SoundEffect _lineClear;
+    private SoundEffect _rotateSound;
+    private SoundEffect _land;
+    private SoundEffect _levelUp;
+    private SoundEffect _pause;
+    private SoundEffect _gameStart;
+    
     
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
@@ -65,6 +78,7 @@ public class Game1 : Game
         
         _heldTetromino = null;
         _nextTetromino = GetRandomTetromino();
+        
 
         base.Initialize();
     }
@@ -75,14 +89,15 @@ public class Game1 : Game
 
         _blockTexture = Content.Load<Texture2D>("block");
         _scoreFont = Content.Load<SpriteFont> ("ScoreFont");
+        _backgroundMusic = Content.Load<Song>("music/theme_a");
+        
+        // PlayBackgroundMusic();
+
     }
     
     protected override void Update(GameTime gameTime)
     {
         var keyboardState = Keyboard.GetState();
-
-        if (keyboardState.IsKeyDown(Keys.Escape))
-            Exit();
 
         switch (_currentState)
         {
@@ -92,9 +107,11 @@ public class Game1 : Game
                     _currentState = GameState.Game;
                     ResetGame();
                 }
+                if (keyboardState.IsKeyDown(Keys.Escape)) Exit();
                 break;
 
             case GameState.Game:
+                if (keyboardState.IsKeyDown(Keys.Escape)) _currentState = GameState.Pause;
                 UpdateGame(gameTime);
                 break;
 
@@ -102,6 +119,24 @@ public class Game1 : Game
                 if (keyboardState.IsKeyDown(Keys.Enter))
                 {
                     _currentState = GameState.Game;
+                    ResetGame();
+                }
+
+                if (keyboardState.IsKeyDown(Keys.Escape))
+                {
+                    _currentState = GameState.TitleScreen;
+                    ResetGame();
+                }
+                break;
+            case GameState.Pause:
+                if (keyboardState.IsKeyDown(Keys.Enter))
+                {
+                    _currentState = GameState.Game;
+                }
+
+                if (keyboardState.IsKeyDown(Keys.Delete))
+                {
+                    _currentState = GameState.TitleScreen;
                     ResetGame();
                 }
                 break;
@@ -187,8 +222,10 @@ public class Game1 : Game
                 break;
 
             case GameState.GameOver:
-                DrawGame();
                 DrawGameOver();
+                break;
+            case GameState.Pause:
+                DrawPause();
                 break;
         }
 
@@ -308,20 +345,38 @@ public class Game1 : Game
 
     protected void DrawGameOver()
     {
-        string gameOverText = "GAME OVER!";
-        // center it in the grid
-        Vector2 textPosition = new Vector2(GridWidth * CellSize / 2 - _scoreFont.MeasureString(gameOverText).X / 2, GridHeight * CellSize / 2 - _scoreFont.MeasureString(gameOverText).Y / 2);
-        _spriteBatch.DrawString(_scoreFont, gameOverText, textPosition, Color.White);
-        // add score, and show that it can be restarted and closed
+        _spriteBatch.Begin();
         string restartText = "Press ENTER to restart";
-        textPosition = new Vector2(GridWidth * CellSize / 2 - _scoreFont.MeasureString(restartText).X / 2, GridHeight * CellSize / 2 + _scoreFont.MeasureString(restartText).Y / 2);
+        string closeText = "Press ESCAPE to go to menu";
+        string gameOverText = "GAME OVER!";
+        
+        Vector2 gameOverPos = new Vector2(GraphicsDevice.Viewport.Width / 2 - _scoreFont.MeasureString(gameOverText).X / 2, 200);
+        _spriteBatch.DrawString(_scoreFont, gameOverText, gameOverPos, Color.White);
+        Vector2 textPosition =
+            new Vector2(GraphicsDevice.Viewport.Width / 2 - _scoreFont.MeasureString(restartText).X / 2, 250);
         _spriteBatch.DrawString(_scoreFont, restartText, textPosition, Color.White);
-        string closeText = "Press ESCAPE to close";
-        textPosition = new Vector2(GridWidth * CellSize / 2 - _scoreFont.MeasureString(closeText).X / 2, GridHeight * CellSize / 2 + _scoreFont.MeasureString(closeText).Y / 2 + 30);
-        _spriteBatch.DrawString(_scoreFont, closeText, textPosition, Color.White);
-        string scoreText = $"Your Score: {_score}";
-        textPosition = new Vector2(GridWidth * CellSize / 2 - _scoreFont.MeasureString(scoreText).X / 2, GridHeight * CellSize / 2 + _scoreFont.MeasureString(scoreText).Y / 2 + 60);
-        _spriteBatch.DrawString(_scoreFont, scoreText, textPosition, Color.White);
+        Vector2 closeTextPos =
+            new Vector2(GraphicsDevice.Viewport.Width / 2 - _scoreFont.MeasureString(closeText).X / 2, 310);
+        _spriteBatch.DrawString(_scoreFont, closeText, closeTextPos, Color.White);
+        _spriteBatch.End();
+    }
+
+    protected void DrawPause()
+    {
+        _spriteBatch.Begin();
+        string pauseText = "PAUSED";
+        string restartText = "Press ENTER to restart";
+        string closeText = "Press DELETE to go to menu";
+        Vector2 gameOverPos = new Vector2(GraphicsDevice.Viewport.Width / 2 - _scoreFont.MeasureString(pauseText).X / 2,
+            200);
+        _spriteBatch.DrawString(_scoreFont, pauseText, gameOverPos, Color.White);
+        Vector2 textPosition =
+            new Vector2(GraphicsDevice.Viewport.Width / 2 - _scoreFont.MeasureString(restartText).X / 2, 250);
+        _spriteBatch.DrawString(_scoreFont, restartText, textPosition, Color.White);
+        Vector2 closeTextPos =
+            new Vector2(GraphicsDevice.Viewport.Width / 2 - _scoreFont.MeasureString(closeText).X / 2, 310);
+        _spriteBatch.DrawString(_scoreFont, closeText, closeTextPos, Color.White);
+        _spriteBatch.End();
     }
 
     private void DrawNextTetromino()
@@ -462,6 +517,7 @@ public class Game1 : Game
                         if (gridY <= 0)
                         {
                             _isGameOver = true;
+                            _currentState = GameState.GameOver;
                             return;
                         }
                     }
@@ -590,6 +646,7 @@ public class Game1 : Game
         speed = 0.5;
         _isGameOver = false;
         _currentState = GameState.Game;
+        PlayBackgroundMusic();
     }
     
     
@@ -616,5 +673,12 @@ public class Game1 : Game
         _spriteBatch.DrawString(_scoreFont, startText, startPosition, Color.White);
         _spriteBatch.DrawString(_scoreFont, exitText, exitPosition, Color.White);
         _spriteBatch.End();
+    }
+    
+    private void PlayBackgroundMusic()
+    {
+        MediaPlayer.Play(_backgroundMusic);
+        MediaPlayer.IsRepeating = true;
+        MediaPlayer.Volume = 0.5f; // Adjust volume as needed (0.0f to 1.0f)
     }
 }
