@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using Microsoft.Xna.Framework;
 using Newtonsoft.Json;
@@ -16,6 +17,9 @@ public class Tetromino
     
     public int Width => Shape.GetLength(1);
     public int Height => Shape.GetLength(0);
+    
+    public static List<Tetromino> BlockList = Tetromino.ReadFromJSON();
+
     
 
     public Tetromino(int[,] shape, Color color)
@@ -68,6 +72,20 @@ public class Tetromino
         Position = new Vector2(Position.X + dx, Position.Y + dy);
     }
     
+    public static Tetromino GetRandomTetromino()
+    {
+        if (BlockList.Count == 0) throw new InvalidOperationException("No tetrominos available in the block list.");
+        Random rnd = new Random();
+        int index = rnd.Next(BlockList.Count);
+        Tetromino selectedTetromino = BlockList[index];
+
+        Tetromino newTetromino = new Tetromino(selectedTetromino.Shape, selectedTetromino.Color)
+        {
+            Position = new Vector2(GameBoard.GridWidth / 2 - selectedTetromino.Shape.GetLength(1) / 2, 0)
+        };
+
+        return newTetromino;
+    }
     public static List<Tetromino> ReadFromJSON()
     {
         List<JSONBlock> list;

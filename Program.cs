@@ -1,2 +1,2 @@
-﻿using var game = new Tetris.Game1();
+﻿using var game = new Tetris.Tetris();
 game.Run();

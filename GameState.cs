@@ -3,7 +3,7 @@
 public enum GameState
 {
     TitleScreen,
-    Settings,
+    Select,
     Game,
     GameOver,
     Pause
