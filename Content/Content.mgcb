@@ -37,6 +37,30 @@
 /processorParam:Quality=Best
 /build:music/theme_a.mp3
 
+#begin music/theme_b.mp3
+/importer:Mp3Importer
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:music/theme_b.mp3
+
+#begin music/theme_c.mp3
+/importer:Mp3Importer
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:music/theme_c.mp3
+
+#begin music/theme_d.mp3
+/importer:Mp3Importer
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:music/theme_d.mp3
+
+#begin music/title.mp3
+/importer:Mp3Importer
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:music/title.mp3
+
 #begin ScoreFont.spritefont
 /importer:FontDescriptionImporter
 /processor:FontDescriptionProcessor
@@ -56,15 +80,15 @@
 /processorParam:Quality=Best
 /build:sound/block_rotate.wav
 
-#begin sound/levelup.wav
+#begin sound/level_up.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
-/build:sound/levelup.wav
+/build:sound/level_up.wav
 
-#begin sound/line_destroy.wav
+#begin sound/line_clear.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
-/build:sound/line_destroy.wav
+/build:sound/line_clear.wav
 
