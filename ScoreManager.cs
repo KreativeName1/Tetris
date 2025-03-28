@@ -4,15 +4,15 @@ namespace Tetris;
 
 public class ScoreManager
 {
+    public ScoreManager()
+    {
+        Reset();
+    }
 
     public int Score { get; private set; }
     public int Level { get; set; }
     public int TotalLinesCleared { get; private set; }
 
-    public ScoreManager()
-    {
-        Reset();
-    }
     public void UpdateScore(int linesCleared)
     {
         if (linesCleared > 0)

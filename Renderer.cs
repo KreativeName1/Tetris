@@ -11,18 +11,18 @@ public class Renderer
     // Define offsets for the game field
     private const int GameFieldOffsetX = 250;
     private const int GameFieldOffsetY = 20;
-    
-    private Texture2D _blockTexture;
     private readonly GraphicsDeviceManager _graphics;
     private readonly GraphicsDevice _graphicsDevice;
+    private readonly SpriteBatch _spriteBatch;
+
+    private Texture2D _blockTexture;
+    private List<(Tetromino tetromino, Vector2 position)> _boardTetrominos;
+    private readonly Controls _controls;
     private Texture2D _pixel;
     private SpriteFont _scoreFont;
-    private Controls _controls;
-    private readonly SpriteBatch _spriteBatch;
-    
+
     // for title screen tetrominos
     private List<(Tetromino tetromino, Vector2 position, int size)> _titleScreenTetrominos;
-    private List<(Tetromino tetromino, Vector2 position)> _boardTetrominos;
 
     public Renderer(GraphicsDevice graphicsDevice, GraphicsDeviceManager graphics, Controls controls)
     {
@@ -44,30 +44,30 @@ public class Renderer
 
     private void InitializeTitleScreenTetrominos()
     {
-        Random random = new Random();
+        var random = new Random();
         _titleScreenTetrominos = new List<(Tetromino, Vector2, int)>();
         _boardTetrominos = new List<(Tetromino, Vector2)>();
 
-        for (int i = 0; i < 100; i++)
+        for (var i = 0; i < 100; i++)
         {
-            Tetromino tetromino = Tetromino.GetRandomTetromino();
-            int size = random.Next(15, 31);
-            int x = random.Next(0, _graphics.PreferredBackBufferWidth - tetromino.Width * size);
-            int y = random.Next(0, _graphics.PreferredBackBufferHeight - tetromino.Height * size);
+            var tetromino = Tetromino.GetRandomTetromino();
+            var size = random.Next(15, 31);
+            var x = random.Next(0, _graphics.PreferredBackBufferWidth - tetromino.Width * size);
+            var y = random.Next(0, _graphics.PreferredBackBufferHeight - tetromino.Height * size);
             _titleScreenTetrominos.Add((tetromino, new Vector2(x, y), size));
         }
 
-        int cellSize = 20;
-        int boardWidth = 10 * cellSize;
-        int boardHeight = 20 * cellSize;
-        int boardX = _graphics.PreferredBackBufferWidth - boardWidth - 20;
-        int boardY = (_graphics.PreferredBackBufferHeight - boardHeight) / 2;
+        var cellSize = 20;
+        var boardWidth = 10 * cellSize;
+        var boardHeight = 20 * cellSize;
+        var boardX = _graphics.PreferredBackBufferWidth - boardWidth - 20;
+        var boardY = (_graphics.PreferredBackBufferHeight - boardHeight) / 2;
 
-        for (int i = 0; i < 3; i++)
+        for (var i = 0; i < 3; i++)
         {
-            Tetromino tetromino = Tetromino.GetRandomTetromino();
-            int x = boardX + random.Next(0, 10 - tetromino.Width) * cellSize;
-            int y = boardY + random.Next(0, 20 - tetromino.Height) * cellSize;
+            var tetromino = Tetromino.GetRandomTetromino();
+            var x = boardX + random.Next(0, 10 - tetromino.Width) * cellSize;
+            var y = boardY + random.Next(0, 20 - tetromino.Height) * cellSize;
             _boardTetrominos.Add((tetromino, new Vector2(x, y)));
         }
     }
@@ -197,184 +197,185 @@ public class Renderer
 
     public void DrawTitleScreen()
     {
-
         _spriteBatch.Begin();
-        
-        _spriteBatch.Draw(_pixel, new Rectangle(0, 0, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight), new Color(0, 0, 50));
-        DrawTitleScreenDecoration(12 * 20 ,20 * 20, 20);
 
-        string titleText = "TETRIS";
-        Vector2 titlePosition = new Vector2(
+        _spriteBatch.Draw(_pixel,
+            new Rectangle(0, 0, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight),
+            new Color(0, 0, 50));
+        DrawTitleScreenDecoration(12 * 20, 20 * 20, 20);
+
+        var titleText = "TETRIS";
+        var titlePosition = new Vector2(
             _graphics.PreferredBackBufferWidth / 2 - _scoreFont.MeasureString(titleText).X / 2,
             _graphics.PreferredBackBufferHeight / 4);
         DrawOutlinedText(_spriteBatch, _scoreFont, titleText, titlePosition, Color.Cyan, Color.Blue, 3);
 
-        string[] menuOptions = { $"[{_controls.MenuSelect.ToString().ToUpper()}]: Start", $"[{_controls.ShowControls.ToString().ToUpper()}]: Controls", $"[{_controls.MenuBack.ToString().ToUpper()}]: Exit" };
-        for (int i = 0; i < menuOptions.Length; i++)
+        string[] menuOptions =
         {
-            Vector2 position = new Vector2(
+            $"[{_controls.MenuSelect.ToString().ToUpper()}]: Start",
+            $"[{_controls.ShowControls.ToString().ToUpper()}]: Controls",
+            $"[{_controls.MenuBack.ToString().ToUpper()}]: Exit"
+        };
+        for (var i = 0; i < menuOptions.Length; i++)
+        {
+            var position = new Vector2(
                 _graphics.PreferredBackBufferWidth / 2 - _scoreFont.MeasureString(menuOptions[i]).X / 2,
                 _graphics.PreferredBackBufferHeight / 2 + i * 50);
-            Color color = Color.Lerp(Color.White, Color.Cyan, (float)i / (menuOptions.Length - 1));
+            var color = Color.Lerp(Color.White, Color.Cyan, (float)i / (menuOptions.Length - 1));
             _spriteBatch.DrawString(_scoreFont, menuOptions[i], position, color);
         }
 
-        string versionText = "v1.0dev (c) Sascha Dierl 2025";
-        Vector2 versionPosition = new Vector2(
+        var versionText = "v1.0dev (c) Sascha Dierl 2025";
+        var versionPosition = new Vector2(
             _graphics.PreferredBackBufferWidth - _scoreFont.MeasureString(versionText).X - 10,
             _graphics.PreferredBackBufferHeight - _scoreFont.MeasureString(versionText).Y - 10);
         _spriteBatch.DrawString(_scoreFont, versionText, versionPosition, Color.Gray);
 
         _spriteBatch.End();
-
     }
 
-    public void DrawTitleScreenDecoration(int boardWidth,int  boardHeight, int cellSize)    
+    public void DrawTitleScreenDecoration(int boardWidth, int boardHeight, int cellSize)
     {
-
         // Draw falling Tetrominos
         foreach (var (tetromino, position, size) in _titleScreenTetrominos)
-        {
             DrawTetrominoOnTitleScreen(tetromino, position, size, 0.5f);
-        }
 
-        int boardX = (_graphics.PreferredBackBufferWidth - boardWidth) / 2;
-        int boardY = (_graphics.PreferredBackBufferHeight - boardHeight) / 2;
+        var boardX = (_graphics.PreferredBackBufferWidth - boardWidth) / 2;
+        var boardY = (_graphics.PreferredBackBufferHeight - boardHeight) / 2;
         DrawBox(_spriteBatch, new Rectangle(boardX, boardY, boardWidth, boardHeight), Color.White * 0.3f, 2);
 
         foreach (var (tetromino, position) in _boardTetrominos)
-        {
-            DrawTetrominoOnTitleScreen(tetromino, new Vector2(boardX + position.X, boardY + position.Y), cellSize, 0.7f);
-        }
-
+            DrawTetrominoOnTitleScreen(tetromino, new Vector2(boardX + position.X, boardY + position.Y), cellSize,
+                0.7f);
     }
 
     private void DrawTetrominoOnTitleScreen(Tetromino tetromino, Vector2 position, int cellSize, float alpha)
     {
-        for (int y = 0; y < tetromino.Height; y++)
-        {
-            for (int x = 0; x < tetromino.Width; x++)
+        for (var y = 0; y < tetromino.Height; y++)
+        for (var x = 0; x < tetromino.Width; x++)
+            if (tetromino.Shape[y, x] != 0)
             {
-                if (tetromino.Shape[y, x] != 0)
-                {
-                    Rectangle destRect = new Rectangle(
-                        (int)position.X + x * cellSize,
-                        (int)position.Y + y * cellSize,
-                        cellSize,
-                        cellSize);
-                    _spriteBatch.Draw(_blockTexture, destRect, tetromino.Color * alpha);
-                }
+                var destRect = new Rectangle(
+                    (int)position.X + x * cellSize,
+                    (int)position.Y + y * cellSize,
+                    cellSize,
+                    cellSize);
+                _spriteBatch.Draw(_blockTexture, destRect, tetromino.Color * alpha);
             }
-        }
     }
 
-   public void DrawGameOver(ScoreManager scoreManager, List<HighscoreData> highscores, int newHighscoreIndex = -1, string playerName = "", int scrollOffset = 0)
-{
-    _spriteBatch.Begin();
-
-    var screenWidth = _graphicsDevice.Viewport.Width;
-    var screenHeight = _graphicsDevice.Viewport.Height;
-
-    var pixel = new Texture2D(_graphicsDevice, 1, 1);
-    pixel.SetData(new[] { Color.Black });
-    _spriteBatch.Draw(pixel, new Rectangle(0, 0, screenWidth, screenHeight), new Color(0, 0, 0, 200));
-
-    var gameOverText = "GAME OVER";
-    var scoreText = $"Your Score: {scoreManager.Score}";
-    var restartText = $"[{_controls.MenuBack.ToString().ToUpper()}]: return to Menu";
-
-    var gameOverPos = new Vector2(screenWidth / 2 - _scoreFont.MeasureString(gameOverText).X / 2, 50);
-    var scorePos = new Vector2(screenWidth / 2 - _scoreFont.MeasureString(scoreText).X / 2, 100);
-    var restartPos = new Vector2(screenWidth / 2 - _scoreFont.MeasureString(restartText).X / 2, screenHeight - 50);
-
-    DrawOutlinedText(_spriteBatch, _scoreFont, gameOverText, gameOverPos, Color.Red, Color.White, 2);
-    _spriteBatch.DrawString(_scoreFont, scoreText, scorePos, Color.Yellow);
-
-    if (newHighscoreIndex != -1)
+    public void DrawGameOver(ScoreManager scoreManager, List<HighscoreData> highscores, int newHighscoreIndex = -1,
+        string playerName = "", int scrollOffset = 0)
     {
-        var newHighscoreText = "NEW HIGHSCORE!";
-        var enterNameText = "Enter your name:";
-        var newHighscorePos = new Vector2(screenWidth / 2 - _scoreFont.MeasureString(newHighscoreText).X / 2, 150);
-        var enterNamePos = new Vector2(screenWidth / 2 - _scoreFont.MeasureString(enterNameText).X / 2, 190);
-        var nameInputPos = new Vector2(screenWidth / 2 - _scoreFont.MeasureString(playerName).X / 2, 230);
+        _spriteBatch.Begin();
 
-        DrawOutlinedText(_spriteBatch, _scoreFont, newHighscoreText, newHighscorePos, Color.Gold, Color.White, 1);
-        _spriteBatch.DrawString(_scoreFont, enterNameText, enterNamePos, Color.White);
-        _spriteBatch.DrawString(_scoreFont, playerName + "_", nameInputPos, Color.Cyan);
-    }
+        var screenWidth = _graphicsDevice.Viewport.Width;
+        var screenHeight = _graphicsDevice.Viewport.Height;
 
-    var titleText = "TOP SCORES";
-    var titlePosition = new Vector2(screenWidth / 2 - _scoreFont.MeasureString(titleText).X / 2, 280);
-    DrawOutlinedText(_spriteBatch, _scoreFont, titleText, titlePosition, Color.Gold, Color.White, 1);
+        var pixel = new Texture2D(_graphicsDevice, 1, 1);
+        pixel.SetData(new[] { Color.Black });
+        _spriteBatch.Draw(pixel, new Rectangle(0, 0, screenWidth, screenHeight), new Color(0, 0, 0, 200));
 
-    
-    var boxPadding = 20;
-    var boxWidth = 300;
-    var boxHeight = 220;
-    var boxX = screenWidth / 2 - boxWidth / 2;
-    var boxY = 320;
-    DrawBox(_spriteBatch, new Rectangle(boxX, boxY, boxWidth, boxHeight), Color.White, 2);
+        var gameOverText = "GAME OVER";
+        var scoreText = $"Your Score: {scoreManager.Score}";
+        var restartText = $"[{_controls.MenuBack.ToString().ToUpper()}]: return to Menu";
 
-    // Draw scrollbar if there are more than 5 highscores
-    if (highscores.Count > 5)
-    {
-        var scrollbarHeight = boxHeight * (5f / highscores.Count);
-        var scrollbarY = boxY + (boxHeight - scrollbarHeight) * (scrollOffset / (float)(highscores.Count - 5));
-        DrawBox(_spriteBatch, new Rectangle(boxX + boxWidth - 10, (int)scrollbarY, 5, (int)scrollbarHeight), Color.Gray, 1);
-    }
+        var gameOverPos = new Vector2(screenWidth / 2 - _scoreFont.MeasureString(gameOverText).X / 2, 50);
+        var scorePos = new Vector2(screenWidth / 2 - _scoreFont.MeasureString(scoreText).X / 2, 100);
+        var restartPos = new Vector2(screenWidth / 2 - _scoreFont.MeasureString(restartText).X / 2, screenHeight - 50);
 
-    for (var i = scrollOffset; i < Math.Min(highscores.Count, scrollOffset + 5); i++)
-    {
-        var data = highscores[i];
-        var rankText = $"{i + 1}.";
-        var nameText = data.Name;
-        var scoreValueText = data.Score.ToString();
+        DrawOutlinedText(_spriteBatch, _scoreFont, gameOverText, gameOverPos, Color.Red, Color.White, 2);
+        _spriteBatch.DrawString(_scoreFont, scoreText, scorePos, Color.Yellow);
 
-        var rankPos = new Vector2(boxX + boxPadding, boxY + 20 + (i - scrollOffset) * 40);
-        var namePos = new Vector2(boxX + boxPadding + 40, boxY + 20 + (i - scrollOffset) * 40);
-        var highscorePos = new Vector2(boxX + boxWidth - boxPadding - _scoreFont.MeasureString(scoreValueText).X,
-            boxY + 20 + (i - scrollOffset) * 40);
-
-        Color textColor = GetHighscoreColor(i);
-
-        if (i == newHighscoreIndex)
+        if (newHighscoreIndex != -1)
         {
-            Rectangle highlightRect = new Rectangle(
-                (int)rankPos.X - 5,
-                (int)rankPos.Y - 5,
-                boxWidth - 2 * boxPadding + 10,
-                30);
-            _spriteBatch.Draw(_pixel, highlightRect, new Color(255, 255, 0, 100));
-            textColor = Color.Cyan;
+            var newHighscoreText = "NEW HIGHSCORE!";
+            var enterNameText = "Enter your name:";
+            var newHighscorePos = new Vector2(screenWidth / 2 - _scoreFont.MeasureString(newHighscoreText).X / 2, 150);
+            var enterNamePos = new Vector2(screenWidth / 2 - _scoreFont.MeasureString(enterNameText).X / 2, 190);
+            var nameInputPos = new Vector2(screenWidth / 2 - _scoreFont.MeasureString(playerName).X / 2, 230);
+
+            DrawOutlinedText(_spriteBatch, _scoreFont, newHighscoreText, newHighscorePos, Color.Gold, Color.White, 1);
+            _spriteBatch.DrawString(_scoreFont, enterNameText, enterNamePos, Color.White);
+            _spriteBatch.DrawString(_scoreFont, playerName + "_", nameInputPos, Color.Cyan);
         }
 
-        _spriteBatch.DrawString(_scoreFont, rankText, rankPos, textColor);
-        _spriteBatch.DrawString(_scoreFont, nameText, namePos, textColor);
-        _spriteBatch.DrawString(_scoreFont, scoreValueText, highscorePos, textColor);
+        var titleText = "TOP SCORES";
+        var titlePosition = new Vector2(screenWidth / 2 - _scoreFont.MeasureString(titleText).X / 2, 280);
+        DrawOutlinedText(_spriteBatch, _scoreFont, titleText, titlePosition, Color.Gold, Color.White, 1);
+
+
+        var boxPadding = 20;
+        var boxWidth = 300;
+        var boxHeight = 220;
+        var boxX = screenWidth / 2 - boxWidth / 2;
+        var boxY = 320;
+        DrawBox(_spriteBatch, new Rectangle(boxX, boxY, boxWidth, boxHeight), Color.White, 2);
+
+        // Draw scrollbar if there are more than 5 highscores
+        if (highscores.Count > 5)
+        {
+            var scrollbarHeight = boxHeight * (5f / highscores.Count);
+            var scrollbarY = boxY + (boxHeight - scrollbarHeight) * (scrollOffset / (float)(highscores.Count - 5));
+            DrawBox(_spriteBatch, new Rectangle(boxX + boxWidth - 10, (int)scrollbarY, 5, (int)scrollbarHeight),
+                Color.Gray, 1);
+        }
+
+        for (var i = scrollOffset; i < Math.Min(highscores.Count, scrollOffset + 5); i++)
+        {
+            var data = highscores[i];
+            var rankText = $"{i + 1}.";
+            var nameText = data.Name;
+            var scoreValueText = data.Score.ToString();
+
+            var rankPos = new Vector2(boxX + boxPadding, boxY + 20 + (i - scrollOffset) * 40);
+            var namePos = new Vector2(boxX + boxPadding + 40, boxY + 20 + (i - scrollOffset) * 40);
+            var highscorePos = new Vector2(boxX + boxWidth - boxPadding - _scoreFont.MeasureString(scoreValueText).X,
+                boxY + 20 + (i - scrollOffset) * 40);
+
+            var textColor = GetHighscoreColor(i);
+
+            if (i == newHighscoreIndex)
+            {
+                var highlightRect = new Rectangle(
+                    (int)rankPos.X - 5,
+                    (int)rankPos.Y - 5,
+                    boxWidth - 2 * boxPadding + 10,
+                    30);
+                _spriteBatch.Draw(_pixel, highlightRect, new Color(255, 255, 0, 100));
+                textColor = Color.Cyan;
+            }
+
+            _spriteBatch.DrawString(_scoreFont, rankText, rankPos, textColor);
+            _spriteBatch.DrawString(_scoreFont, nameText, namePos, textColor);
+            _spriteBatch.DrawString(_scoreFont, scoreValueText, highscorePos, textColor);
+        }
+
+        // Draw scroll instructions if there are more than 5 highscores
+        if (highscores.Count > 5)
+        {
+            var scrollInstructions = $"Use {_controls.MenuUp}/{_controls.MenuDown} to scroll";
+            var scrollInstructionsPos =
+                new Vector2(screenWidth / 2 - _scoreFont.MeasureString(scrollInstructions).X / 2,
+                    boxY + boxHeight + 10);
+            _spriteBatch.DrawString(_scoreFont, scrollInstructions, scrollInstructionsPos, Color.White);
+        }
+
+        _spriteBatch.DrawString(_scoreFont, restartText, restartPos, Color.White);
+
+        _spriteBatch.End();
     }
 
-    // Draw scroll instructions if there are more than 5 highscores
-    if (highscores.Count > 5)
+    private Color GetHighscoreColor(int index)
     {
-        string scrollInstructions = $"Use {_controls.MenuUp}/{_controls.MenuDown} to scroll";
-        Vector2 scrollInstructionsPos = new Vector2(screenWidth / 2 - _scoreFont.MeasureString(scrollInstructions).X / 2, boxY + boxHeight + 10);
-        _spriteBatch.DrawString(_scoreFont, scrollInstructions, scrollInstructionsPos, Color.White);
+        switch (index)
+        {
+            case 0: return Color.Gold;
+            case 1: return Color.Silver;
+            case 2: return new Color(205, 127, 50);
+            default: return Color.White;
+        }
     }
-
-    _spriteBatch.DrawString(_scoreFont, restartText, restartPos, Color.White);
-
-    _spriteBatch.End();
-}
-private Color GetHighscoreColor(int index)
-{
-    switch (index)
-    {
-        case 0: return Color.Gold;
-        case 1: return Color.Silver;
-        case 2: return new Color(205, 127, 50);
-        default: return Color.White;
-    }
-}
 
     private void DrawOutlinedText(SpriteBatch spriteBatch, SpriteFont font, string text, Vector2 position, Color color,
         Color outlineColor, int thickness)
@@ -398,7 +399,8 @@ private Color GetHighscoreColor(int index)
     {
         _spriteBatch.Begin();
 
-        _spriteBatch.Draw(_pixel, new Rectangle(0, 0, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight), Color.Black);
+        _spriteBatch.Draw(_pixel,
+            new Rectangle(0, 0, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight), Color.Black);
 
         var pauseText = "PAUSED";
         var continueText = $"[{_controls.Pause.ToString().ToUpper()}]: Continue";
@@ -431,62 +433,65 @@ private Color GetHighscoreColor(int index)
     }
 
 
-   public void DrawSelect(int selectedLevel, int maxLevel, int selectedSongIndex, int startIndex, int maxSongIndex)
-{
-    _spriteBatch.Begin();
+    public void DrawSelect(int selectedLevel, int maxLevel, int selectedSongIndex, int startIndex, int maxSongIndex)
+    {
+        _spriteBatch.Begin();
 
-    _spriteBatch.Draw(_pixel, new Rectangle(0, 0, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight), new Color(0, 0, 50));
-    
-    DrawTitleScreenDecoration(20 * 20 ,24 * 20, 20);
-    
-    var titleText = "GAME OPTIONS";
-    var levelText = $"Starting Level: {selectedLevel}";
-    var songText = $"Music Track: {selectedSongIndex}";
-    var controlsText = $"{_controls.MenuUp.ToString().ToUpper()}/{_controls.MenuDown.ToString().ToUpper()}: Music   {_controls.MenuLeft.ToString().ToUpper()}/{_controls.MenuRight.ToString().ToUpper()}: Level";
-    var startText = $"[{_controls.MenuSelect.ToString().ToUpper()}]: Start game";
-    var backText = $"[{_controls.MenuBack.ToString().ToUpper()}]: Back";
+        _spriteBatch.Draw(_pixel,
+            new Rectangle(0, 0, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight),
+            new Color(0, 0, 50));
+
+        DrawTitleScreenDecoration(20 * 20, 24 * 20, 20);
+
+        var titleText = "GAME OPTIONS";
+        var levelText = $"Starting Level: {selectedLevel}";
+        var songText = $"Music Track: {selectedSongIndex}";
+        var controlsText =
+            $"{_controls.MenuUp.ToString().ToUpper()}/{_controls.MenuDown.ToString().ToUpper()}: Music   {_controls.MenuLeft.ToString().ToUpper()}/{_controls.MenuRight.ToString().ToUpper()}: Level";
+        var startText = $"[{_controls.MenuSelect.ToString().ToUpper()}]: Start game";
+        var backText = $"[{_controls.MenuBack.ToString().ToUpper()}]: Back";
 
 
-    var titlePosition = new Vector2(
-        _graphics.PreferredBackBufferWidth / 2 - _scoreFont.MeasureString(titleText).X / 2,
-        100);
+        var titlePosition = new Vector2(
+            _graphics.PreferredBackBufferWidth / 2 - _scoreFont.MeasureString(titleText).X / 2,
+            100);
 
-    var levelPosition = new Vector2(
-        _graphics.PreferredBackBufferWidth / 2 - _scoreFont.MeasureString(levelText).X / 2,
-        200);
+        var levelPosition = new Vector2(
+            _graphics.PreferredBackBufferWidth / 2 - _scoreFont.MeasureString(levelText).X / 2,
+            200);
 
-    var musicPosition = new Vector2(
-        _graphics.PreferredBackBufferWidth / 2 - _scoreFont.MeasureString(songText).X / 2,
-        270);
+        var musicPosition = new Vector2(
+            _graphics.PreferredBackBufferWidth / 2 - _scoreFont.MeasureString(songText).X / 2,
+            270);
 
-    var controlsPosition = new Vector2(
-        _graphics.PreferredBackBufferWidth / 2 - _scoreFont.MeasureString(controlsText).X / 2,
-        370);
+        var controlsPosition = new Vector2(
+            _graphics.PreferredBackBufferWidth / 2 - _scoreFont.MeasureString(controlsText).X / 2,
+            370);
 
-    var startPosition = new Vector2(
-        _graphics.PreferredBackBufferWidth / 2 - _scoreFont.MeasureString(startText).X / 2,
-        450);
+        var startPosition = new Vector2(
+            _graphics.PreferredBackBufferWidth / 2 - _scoreFont.MeasureString(startText).X / 2,
+            450);
 
-    var backPosition = new Vector2(
-        _graphics.PreferredBackBufferWidth / 2 - _scoreFont.MeasureString(backText).X / 2,
-        500);
+        var backPosition = new Vector2(
+            _graphics.PreferredBackBufferWidth / 2 - _scoreFont.MeasureString(backText).X / 2,
+            500);
 
-    // Draw title
-    DrawOutlinedText(_spriteBatch, _scoreFont, titleText, titlePosition, Color.Cyan, Color.Blue, 2);
+        // Draw title
+        DrawOutlinedText(_spriteBatch, _scoreFont, titleText, titlePosition, Color.Cyan, Color.Blue, 2);
 
-    // Draw options
-    DrawSelectionArrows(levelPosition, levelText, selectedLevel > 1, selectedLevel < maxLevel);
-    DrawSelectionArrows(musicPosition, songText, selectedSongIndex > startIndex, selectedSongIndex < maxSongIndex);
+        // Draw options
+        DrawSelectionArrows(levelPosition, levelText, selectedLevel > 1, selectedLevel < maxLevel);
+        DrawSelectionArrows(musicPosition, songText, selectedSongIndex > startIndex, selectedSongIndex < maxSongIndex);
 
-    // Draw controls info
-    _spriteBatch.DrawString(_scoreFont, controlsText, controlsPosition, Color.Yellow);
+        // Draw controls info
+        _spriteBatch.DrawString(_scoreFont, controlsText, controlsPosition, Color.Yellow);
 
-    // Draw action texts
-    _spriteBatch.DrawString(_scoreFont, startText, startPosition, Color.Green);
-    _spriteBatch.DrawString(_scoreFont, backText, backPosition, Color.Red);
+        // Draw action texts
+        _spriteBatch.DrawString(_scoreFont, startText, startPosition, Color.Green);
+        _spriteBatch.DrawString(_scoreFont, backText, backPosition, Color.Red);
 
-    _spriteBatch.End();
-}
+        _spriteBatch.End();
+    }
 
     private void DrawSelectionArrows(Vector2 position, string text, bool canDecrease, bool canIncrease)
     {
@@ -518,15 +523,15 @@ private Color GetHighscoreColor(int index)
         _spriteBatch.Draw(_pixel,
             new Rectangle(0, 0, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight),
             new Color(0, 0, 50));
-        
-        int boardWidth = 20 * 20;
-        int boardHeight = 24 * 20;
-        int cellSize = 20;
+
+        var boardWidth = 20 * 20;
+        var boardHeight = 24 * 20;
+        var cellSize = 20;
         DrawTitleScreenDecoration(boardWidth, boardHeight, cellSize);
-    
-        string titleText = "GAME CONTROLS";
-    
-        List<string> controls = new List<string>
+
+        var titleText = "GAME CONTROLS";
+
+        var controls = new List<string>
         {
             $"Left/Right: {_controls.MoveLeft.ToString().ToUpper()}/{_controls.MoveRight.ToString().ToUpper()}",
             $"Hold: {_controls.HoldPiece.ToString().ToUpper()}",
@@ -537,31 +542,31 @@ private Color GetHighscoreColor(int index)
             $"Reload Tetromino: {_controls.DebugReload.ToString().ToUpper()}",
             $"Pause: {_controls.Pause.ToString().ToUpper()}",
             $"Back: {_controls.MenuBack.ToString().ToUpper()}",
-            $"Select: {_controls.MenuSelect.ToString().ToUpper()}",
+            $"Select: {_controls.MenuSelect.ToString().ToUpper()}"
         };
-    
+
         var titlePosition = new Vector2(
             _graphics.PreferredBackBufferWidth / 2 - _scoreFont.MeasureString(titleText).X / 2,
             100);
         DrawOutlinedText(_spriteBatch, _scoreFont, titleText, titlePosition, Color.Cyan, Color.Blue, 2);
-    
-        int borderX = (_graphics.PreferredBackBufferWidth - boardWidth) / 2;
-        int borderY = (_graphics.PreferredBackBufferHeight - boardHeight) / 2;
-    
-        int yOffset = borderY + 60;
-        int xOffset = borderX + 20;
+
+        var borderX = (_graphics.PreferredBackBufferWidth - boardWidth) / 2;
+        var borderY = (_graphics.PreferredBackBufferHeight - boardHeight) / 2;
+
+        var yOffset = borderY + 60;
+        var xOffset = borderX + 20;
         foreach (var control in controls)
         {
             _spriteBatch.DrawString(_scoreFont, control, new Vector2(xOffset, yOffset), Color.White);
             yOffset += 30;
         }
-        
-        string backToMenuText = $"[{_controls.MenuBack.ToString().ToUpper()}]: Back";
-        Vector2 backToMenuPosition = new Vector2(
+
+        var backToMenuText = $"[{_controls.MenuBack.ToString().ToUpper()}]: Back";
+        var backToMenuPosition = new Vector2(
             _graphics.PreferredBackBufferWidth / 2 - _scoreFont.MeasureString(backToMenuText).X / 2,
             borderY + boardHeight - 40);
         _spriteBatch.DrawString(_scoreFont, backToMenuText, backToMenuPosition, Color.Yellow);
-        
+
         _spriteBatch.End();
     }
 }

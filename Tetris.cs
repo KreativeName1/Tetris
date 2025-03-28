@@ -1,51 +1,49 @@
 ﻿using System;
-using System.Collections.Generic;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
 namespace Tetris;
 
 public class Tetris : Game
 {
-    private GraphicsDeviceManager _graphics;
-    private GameState _currentState = GameState.TitleScreen;
-    private GameBoard _gameBoard;
-    private Tetromino _currentTetromino;
-    private Tetromino _heldTetromino;
-    private Tetromino _nextTetromino;
-    private ScoreManager _scoreManager;
-    private InputManager _inputManager;
-    private AudioManager _audioManager;
-    private Renderer _renderer;
-    private Controls _controls;
-    
-    
-    private double speed = 0.5;
-    private double _timeSinceLastFall;
-    
-    private float _moveTimer = 0f;
     private const float MoveCooldown = 0.125f;
-    
-    private float _rotateTimer = 0f;
     private const float RotateCooldown = 0.2f;
-    
+
     private const float KeyPressCooldown = 0.2f;
-    private float _keyPressTimer = 0f;
-    
-    private Random _random;
+    private AudioManager _audioManager;
     private bool _canHold = true;
-    
-    private string playerName = "";
-    bool isEnteringName = false;
-    private int _highscoreScrollOffset = 0;
+    private Controls _controls;
+    private GameState _currentState = GameState.TitleScreen;
+    private Tetromino _currentTetromino;
+    private GameBoard _gameBoard;
+    private readonly GraphicsDeviceManager _graphics;
+    private Tetromino _heldTetromino;
+    private int _highscoreScrollOffset;
+    private InputManager _inputManager;
+    private float _keyPressTimer;
+
+    private float _moveTimer;
+    private Tetromino _nextTetromino;
+
+    private Random _random;
+    private Renderer _renderer;
+
+    private float _rotateTimer;
+    private ScoreManager _scoreManager;
+    private double _timeSinceLastFall;
+    private bool isEnteringName;
 
 
     private int musicIndex = 2;
-    
+
+    private string playerName = "";
+
     private int selLevel = 1;
+    private readonly int selMaxLevel = 10;
     private int selMusic = 1;
-    private int selMaxLevel = 10;
+
+
+    private double speed = 0.5;
 
     public Tetris()
     {
@@ -78,13 +76,12 @@ public class Tetris : Game
     {
         _renderer.LoadContent(Content);
         _audioManager.LoadContent(Content);
-
     }
-    
+
     protected override void Update(GameTime gameTime)
     {
         _inputManager.Update();
-        
+
         if (_inputManager.IsKeyPressed(_controls.DebugReload)) Tetromino.BlockList = Tetromino.ReadFromJSON();
 
         switch (_currentState)
@@ -134,7 +131,7 @@ public class Tetris : Game
             selMusic++;
             if (selMusic > _audioManager.MaxMusicIndex) selMusic = _audioManager.MaxMusicIndex;
         }
-        
+
         if (_inputManager.IsKeyPressed(_controls.MenuSelect))
         {
             ResetGame();
@@ -145,10 +142,10 @@ public class Tetris : Game
         {
             _currentState = GameState.TitleScreen;
         }
-        
+
         _audioManager.PlayBackgroundMusic(selMusic, true);
     }
-    
+
     private void UpdateTitleScreen()
     {
         _audioManager.PlayBackgroundMusic(1, true);
@@ -160,19 +157,19 @@ public class Tetris : Game
     private void UpdateGameOver(GameTime gameTime)
     {
         _audioManager.PlayBackgroundMusic(0, true, false);
-    
+
         _keyPressTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
-        
+
         if (isEnteringName)
         {
             if (_keyPressTimer >= KeyPressCooldown)
             {
-                Keys[] pressedKeys = _inputManager.GetPressedKeys();
+                var pressedKeys = _inputManager.GetPressedKeys();
                 if (pressedKeys.Length > 0)
                 {
-                    Keys key = pressedKeys[0]; // Consider only the first pressed key
-    
-                    if ((key >= Keys.A && key <= Keys.Z) && playerName.Length < 10)
+                    var key = pressedKeys[0]; // Consider only the first pressed key
+
+                    if (key >= Keys.A && key <= Keys.Z && playerName.Length < 10)
                     {
                         playerName += key.ToString();
                         _keyPressTimer = 0f;
@@ -184,7 +181,8 @@ public class Tetris : Game
                     }
                     else if (key == Keys.Enter && playerName.Length > 0)
                     {
-                        HighscoreManager.SaveHighscore(new HighscoreData(playerName, _scoreManager.Score, _scoreManager.Level, _scoreManager.TotalLinesCleared));
+                        HighscoreManager.SaveHighscore(new HighscoreData(playerName, _scoreManager.Score,
+                            _scoreManager.Level, _scoreManager.TotalLinesCleared));
                         isEnteringName = false;
                         _currentState = GameState.TitleScreen;
                         _highscoreScrollOffset = 0;
@@ -201,20 +199,20 @@ public class Tetris : Game
                 _highscoreScrollOffset = 0;
                 _keyPressTimer = 0f;
             }
-            
-            if (_keyPressTimer >= KeyPressCooldown && _inputManager.IsKeyPressed(_controls.MenuUp) && _highscoreScrollOffset > 0)
+
+            if (_keyPressTimer >= KeyPressCooldown && _inputManager.IsKeyPressed(_controls.MenuUp) &&
+                _highscoreScrollOffset > 0)
             {
                 _highscoreScrollOffset--;
                 _keyPressTimer = 0f;
             }
-            else if (_keyPressTimer >= KeyPressCooldown &&_inputManager.IsKeyPressed(_controls.MenuDown) && _highscoreScrollOffset < HighscoreManager.LoadHighscores().Count - 5)
+            else if (_keyPressTimer >= KeyPressCooldown && _inputManager.IsKeyPressed(_controls.MenuDown) &&
+                     _highscoreScrollOffset < HighscoreManager.LoadHighscores().Count - 5)
             {
                 _highscoreScrollOffset++;
                 _keyPressTimer = 0f;
             }
         }
-        
-        
     }
 
     private void UpdatePause()
@@ -234,17 +232,14 @@ public class Tetris : Game
 
     private void UpdateControls()
     {
-        if (_inputManager.IsKeyPressed(_controls.MenuBack))
-        {
-            _currentState = GameState.TitleScreen;
-        }
+        if (_inputManager.IsKeyPressed(_controls.MenuBack)) _currentState = GameState.TitleScreen;
     }
 
     private void UpdateGame(GameTime gameTime)
     {
         _audioManager.PlayBackgroundMusic(selMusic, true);
-        
-        float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+        var deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
         _timeSinceLastFall += deltaTime;
         _moveTimer += deltaTime;
         _rotateTimer += deltaTime;
@@ -262,28 +257,26 @@ public class Tetris : Game
                 MoveTetromino(1, 0);
                 _moveTimer = 0f;
             }
-            
+
             if (_inputManager.IsKeyDown(_controls.SoftDrop))
-            {
                 if (MoveTetromino(0, 1))
                 {
                     _timeSinceLastFall = 0;
                     _moveTimer = 0f;
                 }
-            }
-            
+
             if (_inputManager.IsKeyPressed(_controls.HardDrop))
+            {
+                while (MoveTetromino(0, 1))
                 {
-                while (MoveTetromino(0, 1)) { }
+                }
+
                 _audioManager.PlayHardDrop();
                 PlaceTetromino();
                 GetNextTeromino();
             }
-            
-            if (_inputManager.IsKeyPressed(_controls.HoldPiece))
-            {
-                HoldTetromino();
-            }
+
+            if (_inputManager.IsKeyPressed(_controls.HoldPiece)) HoldTetromino();
         }
 
         // Handle rotation
@@ -291,7 +284,7 @@ public class Tetris : Game
         {
             if (_inputManager.IsKeyPressed(_controls.RotateClockwise))
             {
-                RotateTetromino(true);
+                RotateTetromino();
                 _rotateTimer = 0f;
             }
             else if (_inputManager.IsKeyPressed(_controls.RotateCounterClockwise))
@@ -318,7 +311,7 @@ public class Tetris : Game
             _currentState = GameState.Pause;
         }
     }
-    
+
     protected override void Draw(GameTime gameTime)
     {
         GraphicsDevice.Clear(Color.Black);
@@ -332,20 +325,24 @@ public class Tetris : Game
                 _renderer.DrawGame(_gameBoard, _currentTetromino, _heldTetromino, _nextTetromino, _scoreManager);
                 break;
             case GameState.GameOver:
-                List<HighscoreData> highscores = HighscoreManager.LoadHighscores();
-                int newHighscoreIndex = HighscoreManager.GetNewHighscoreIndex(_scoreManager.Score);
+                var highscores = HighscoreManager.LoadHighscores();
+                var newHighscoreIndex = HighscoreManager.GetNewHighscoreIndex(_scoreManager.Score);
                 if (HighscoreManager.IsNewHighscore(_scoreManager.Score))
                 {
-                    HighscoreData newHighscore = new HighscoreData(playerName, _scoreManager.Score, _scoreManager.Level, _scoreManager.TotalLinesCleared);
+                    var newHighscore = new HighscoreData(playerName, _scoreManager.Score, _scoreManager.Level,
+                        _scoreManager.TotalLinesCleared);
                     highscores.Insert(newHighscoreIndex, newHighscore);
                 }
-                _renderer.DrawGameOver(_scoreManager, highscores, newHighscoreIndex, isEnteringName ? playerName : null, _highscoreScrollOffset);
+
+                _renderer.DrawGameOver(_scoreManager, highscores, newHighscoreIndex, isEnteringName ? playerName : null,
+                    _highscoreScrollOffset);
                 break;
             case GameState.Pause:
                 _renderer.DrawPause();
                 break;
             case GameState.Select:
-                _renderer.DrawSelect(selLevel, selMaxLevel, selMusic, _audioManager.MinMusicIndex, _audioManager.MaxMusicIndex);
+                _renderer.DrawSelect(selLevel, selMaxLevel, selMusic, _audioManager.MinMusicIndex,
+                    _audioManager.MaxMusicIndex);
                 break;
             case GameState.Controls:
                 _renderer.DrawControls();
@@ -358,37 +355,32 @@ public class Tetris : Game
     private void RotateTetromino(bool clockwise = true)
     {
         _audioManager.PlayRotateSound();
-        int[,] originalShape = _currentTetromino.Shape.Clone() as int[,];
-        int originalRows = _currentTetromino.Shape.GetLength(0);
-        int originalCols = _currentTetromino.Shape.GetLength(1);
-        Vector2 originalPosition = _currentTetromino.Position;
-        Rotation originalRotation = _currentTetromino.Rotation;
-    
+        var originalShape = _currentTetromino.Shape.Clone() as int[,];
+        var originalRows = _currentTetromino.Shape.GetLength(0);
+        var originalCols = _currentTetromino.Shape.GetLength(1);
+        var originalPosition = _currentTetromino.Position;
+        var originalRotation = _currentTetromino.Rotation;
+
         _currentTetromino.Rotate(clockwise);
-    
-        int newRows = _currentTetromino.Shape.GetLength(0);
-        int newCols = _currentTetromino.Shape.GetLength(1);
-        Vector2 adjustment = new Vector2(
+
+        var newRows = _currentTetromino.Shape.GetLength(0);
+        var newCols = _currentTetromino.Shape.GetLength(1);
+        var adjustment = new Vector2(
             (originalCols - newCols) / 2f,
             (originalRows - newRows) / 2f
         );
         _currentTetromino.Position += adjustment;
-    
+
         if (_gameBoard.IsCollision(_currentTetromino))
         {
             // If there's a collision, try to adjust the position
-            for (int xOffset = -1; xOffset <= 1; xOffset++)
+            for (var xOffset = -1; xOffset <= 1; xOffset++)
+            for (var yOffset = 0; yOffset <= 1; yOffset++)
             {
-                for (int yOffset = 0; yOffset <= 1; yOffset++)
-                {
-                    _currentTetromino.Position = originalPosition + adjustment + new Vector2(xOffset, yOffset);
-                    if (!_gameBoard.IsCollision(_currentTetromino))
-                    {
-                        return;
-                    }
-                }
+                _currentTetromino.Position = originalPosition + adjustment + new Vector2(xOffset, yOffset);
+                if (!_gameBoard.IsCollision(_currentTetromino)) return;
             }
-    
+
             // If no valid position found, revert the rotation
             _currentTetromino.Shape = originalShape;
             _currentTetromino.Position = originalPosition;
@@ -404,6 +396,7 @@ public class Tetris : Game
             _currentTetromino.Position -= new Vector2(deltaX, deltaY);
             return false;
         }
+
         return true;
     }
 
@@ -411,14 +404,14 @@ public class Tetris : Game
     {
         _audioManager.PlayLand();
         _gameBoard.PlaceTetromino(_currentTetromino);
-        int linesCleared = _gameBoard.ClearCompletedLines();
+        var linesCleared = _gameBoard.ClearCompletedLines();
         if (linesCleared > 0) _audioManager.PlayLineClear();
-        int oldLevel = _scoreManager.Level;
-        
+        var oldLevel = _scoreManager.Level;
+
         _scoreManager.UpdateScore(linesCleared);
         if (oldLevel != _scoreManager.Level) _audioManager.PlayLevelUp();
         speed = _scoreManager.GetSpeed();
-    
+
         if (_gameBoard.IsGameOver)
         {
             _currentState = GameState.GameOver;
@@ -445,7 +438,7 @@ public class Tetris : Game
         }
         else
         {
-            Tetromino temp = _currentTetromino;
+            var temp = _currentTetromino;
             _currentTetromino = new Tetromino(_heldTetromino.Shape, _heldTetromino.Color)
             {
                 Position = new Vector2(GameBoard.GridWidth / 2 - _heldTetromino.Shape.GetLength(1) / 2, 0)
@@ -462,7 +455,7 @@ public class Tetris : Game
         _nextTetromino = Tetromino.GetRandomTetromino();
         _canHold = true;
     }
-    
+
     private void ResetGame()
     {
         _gameBoard.Reset();

@@ -8,15 +8,15 @@ public class Controls
     public Keys MoveRight { get; set; } = Keys.Right;
     public Keys SoftDrop { get; set; } = Keys.Down;
     public Keys HardDrop { get; set; } = Keys.Space;
-    
+
     public Keys RotateClockwise { get; set; } = Keys.Up;
     public Keys RotateCounterClockwise { get; set; } = Keys.Z;
-    
+
     public Keys HoldPiece { get; set; } = Keys.C;
-    
+
     public Keys Pause { get; set; } = Keys.P;
     public Keys Quit { get; set; } = Keys.Escape;
-    
+
     public Keys MenuUp { get; set; } = Keys.Up;
     public Keys MenuDown { get; set; } = Keys.Down;
     public Keys MenuLeft { get; set; } = Keys.Left;

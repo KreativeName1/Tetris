@@ -1,31 +1,30 @@
 ﻿using Microsoft.Xna.Framework.Input;
 
-namespace Tetris
+namespace Tetris;
+
+public class InputManager
 {
-    public class InputManager
+    private KeyboardState _currentKeyboardState;
+    private KeyboardState _previousKeyboardState;
+
+    public void Update()
     {
-        private KeyboardState _currentKeyboardState;
-        private KeyboardState _previousKeyboardState;
+        _previousKeyboardState = _currentKeyboardState;
+        _currentKeyboardState = Keyboard.GetState();
+    }
 
-        public void Update()
-        {
-            _previousKeyboardState = _currentKeyboardState;
-            _currentKeyboardState = Keyboard.GetState();
-        }
+    public bool IsKeyPressed(Keys key)
+    {
+        return _currentKeyboardState.IsKeyDown(key) && !_previousKeyboardState.IsKeyDown(key);
+    }
 
-        public bool IsKeyPressed(Keys key)
-        {
-            return _currentKeyboardState.IsKeyDown(key) && !_previousKeyboardState.IsKeyDown(key);
-        }
+    public bool IsKeyDown(Keys key)
+    {
+        return _currentKeyboardState.IsKeyDown(key);
+    }
 
-        public bool IsKeyDown(Keys key)
-        {
-            return _currentKeyboardState.IsKeyDown(key);
-        }
-
-        public Keys[] GetPressedKeys()
-        {
-            return _currentKeyboardState.GetPressedKeys();
-        }
+    public Keys[] GetPressedKeys()
+    {
+        return _currentKeyboardState.GetPressedKeys();
     }
 }

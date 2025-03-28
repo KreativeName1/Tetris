@@ -7,60 +7,56 @@ using System.Text;
 using System.Text.Json;
 
 namespace Tetris;
+
 public static class HighscoreManager
 {
-    private static readonly string FilePath =  @"./game.dat";
+    private const int MaxHighscores = 10;
+    private static readonly string FilePath = @"./game.dat";
 
     private static readonly string EncryptionKey = "MySecretKey123456";
-    private const int MaxHighscores = 10;
-    
+
     public static bool IsNewHighscore(int score)
     {
-        List<HighscoreData> highscores = LoadHighscores();
-        
+        var highscores = LoadHighscores();
+
         if (highscores.Count == 0 && score > 0) return true;
-        
-        for (int i = 0; i < highscores.Count; i++)
-        {
+
+        for (var i = 0; i < highscores.Count; i++)
             if (score > highscores[i].Score)
                 return true;
-        }
-        
+
         return false;
     }
 
     public static int GetNewHighscoreIndex(int score)
     {
-        List<HighscoreData> highscores = LoadHighscores();
-        
+        var highscores = LoadHighscores();
+
         if (highscores.Count == 0 && score > 0) return 0;
 
-        for (int i = 0; i < highscores.Count; i++)
-        {
+        for (var i = 0; i < highscores.Count; i++)
             if (score > highscores[i].Score)
                 return i;
-        }
 
         return -1;
     }
 
     public static void SaveHighscore(HighscoreData newScore)
     {
-        string directoryPath = Path.GetDirectoryName(FilePath);
+        var directoryPath = Path.GetDirectoryName(FilePath);
         if (!Directory.Exists(directoryPath)) Directory.CreateDirectory(directoryPath);
 
-        List<HighscoreData> highscores = LoadHighscores();
+        var highscores = LoadHighscores();
 
         highscores.Add(newScore);
 
         highscores = highscores.OrderByDescending(h => h.Score).ToList();
 
         if (highscores.Count > MaxHighscores) highscores.RemoveAt(highscores.Count - 1);
-        string jsonData = JsonSerializer.Serialize(highscores);
-        byte[] encryptedData = Encrypt(jsonData, EncryptionKey);
-        
-        File.WriteAllBytes(FilePath, encryptedData);
+        var jsonData = JsonSerializer.Serialize(highscores);
+        var encryptedData = Encrypt(jsonData, EncryptionKey);
 
+        File.WriteAllBytes(FilePath, encryptedData);
     }
 
     public static List<HighscoreData> LoadHighscores()
@@ -69,12 +65,12 @@ public static class HighscoreManager
 
         try
         {
-            byte[] encryptedData = File.ReadAllBytes(FilePath);
-            
+            var encryptedData = File.ReadAllBytes(FilePath);
+
             if (encryptedData.Length == 0)
                 return new List<HighscoreData>();
 
-            string jsonData = Decrypt(encryptedData, EncryptionKey);
+            var jsonData = Decrypt(encryptedData, EncryptionKey);
 
             return JsonSerializer.Deserialize<List<HighscoreData>>(jsonData) ?? new List<HighscoreData>();
         }
@@ -87,7 +83,7 @@ public static class HighscoreManager
 
     private static byte[] Encrypt(string plainText, string key)
     {
-        using Aes aes = Aes.Create();
+        using var aes = Aes.Create();
 
         aes.Key = Encoding.UTF8.GetBytes(PadOrTrimKey(key, 16));
         aes.IV = new byte[16];
@@ -95,14 +91,16 @@ public static class HighscoreManager
         using MemoryStream ms = new();
         using (CryptoStream cs = new(ms, aes.CreateEncryptor(), CryptoStreamMode.Write))
         {
-            using (StreamWriter sw = new(cs)) sw.Write(plainText);
-        
+            using (StreamWriter sw = new(cs))
+            {
+                sw.Write(plainText);
+            }
+
             cs.Close();
         }
 
         return ms.ToArray();
     }
-
 
 
     private static string PadOrTrimKey(string key, int length)
@@ -114,7 +112,7 @@ public static class HighscoreManager
 
     private static string Decrypt(byte[] cipherText, string key)
     {
-        using Aes aes = Aes.Create();
+        using var aes = Aes.Create();
         aes.Key = Encoding.UTF8.GetBytes(PadOrTrimKey(key, 16));
         aes.IV = new byte[16];
 
