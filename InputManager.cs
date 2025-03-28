@@ -22,5 +22,10 @@ namespace Tetris
         {
             return _currentKeyboardState.IsKeyDown(key);
         }
+
+        public Keys[] GetPressedKeys()
+        {
+            return _currentKeyboardState.GetPressedKeys();
+        }
     }
 }

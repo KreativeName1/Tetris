@@ -80,15 +80,33 @@
 /processorParam:Quality=Best
 /build:sound/block_rotate.wav
 
+#begin sound/hard_drop.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:sound/hard_drop.wav
+
 #begin sound/level_up.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
 /build:sound/level_up.wav
 
+#begin sound/line_clear_2.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:sound/line_clear_2.wav
+
 #begin sound/line_clear.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
 /build:sound/line_clear.wav
+
+#begin sound/pause.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:sound/pause.wav
 

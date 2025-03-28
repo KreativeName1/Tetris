@@ -12,22 +12,17 @@ public class Tetromino
     public Color Color { get; set; }
     public Vector2 Position { get; set; }
     public Rotation Rotation { get; set; }
-    public bool IsActive { get; set; }
-    public bool IsLocked { get; set; }
     
     public int Width => Shape.GetLength(1);
     public int Height => Shape.GetLength(0);
     
-    public static List<Tetromino> BlockList = Tetromino.ReadFromJSON();
-
+    public static List<Tetromino> BlockList = ReadFromJSON();
     
 
     public Tetromino(int[,] shape, Color color)
     {
         Shape = shape;
         Color = color;
-        IsActive = true;
-        IsLocked = false;
         Position = Vector2.Zero;
         Rotation = Rotation.Rotate0;
     }
@@ -38,8 +33,6 @@ public class Tetromino
         Color = other.Color;
         Position = other.Position;
         Rotation = other.Rotation;
-        IsActive = other.IsActive;
-        IsLocked = other.IsLocked;
     }
     
     public void Rotate(bool clockwise = true)

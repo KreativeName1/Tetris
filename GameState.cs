@@ -6,5 +6,6 @@ public enum GameState
     Select,
     Game,
     GameOver,
-    Pause
+    Pause,
+    Controls
 }

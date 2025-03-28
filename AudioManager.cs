@@ -14,8 +14,14 @@ namespace Tetris
         private SoundEffect _levelUp;
         private SoundEffect _pause;
         private SoundEffect _gameStart;
+        private SoundEffect _hardDrop;
+        
+        public int MaxMusicIndex;
+        public int MinMusicIndex;
+        
+        public bool IsPaused { get; private set; }
 
-        private int _lastIndex;
+        private int _lastIndex = -1;
 
         public void LoadContent(ContentManager content)
         {
@@ -23,16 +29,21 @@ namespace Tetris
             _rotateSound = content.Load<SoundEffect>("sound/block_rotate");
             _land = content.Load<SoundEffect>("sound/block_land");
             _levelUp = content.Load<SoundEffect>("sound/level_up");
+            _pause = content.Load<SoundEffect>("sound/pause");
+            _hardDrop = content.Load<SoundEffect>("sound/hard_drop");
             
             MusicList = new List<Song>
             {
-                content.Load<Song>("music/title"),
                 content.Load<Song>("music/gameover"),
-                content.Load<Song>("music/theme_a"),
+                content.Load<Song>("music/title"),
+                content.Load<Song>("music/theme_a" ),
                 content.Load<Song>("music/theme_b"),
                 content.Load<Song>("music/theme_c"),
                 content.Load<Song>("music/theme_d"),
             };
+            
+            MaxMusicIndex = MusicList.Count - 1;
+            MinMusicIndex = 1;
         }
 
         public void PlayBackgroundMusic(int index, bool ignoreSameSongPlayback = false, bool loop = true)
@@ -78,6 +89,23 @@ namespace Tetris
         public void PlayPause()
         {
             _pause?.Play();
+        }
+        
+        public void PlayHardDrop()
+        {
+            _hardDrop?.Play();
+        }
+        
+        public void Pause()
+        {
+            IsPaused = true;
+            MediaPlayer.Pause();
+        }
+
+        public void Resume()
+        {
+            IsPaused = false;
+            MediaPlayer.Resume();
         }
     }
 }
