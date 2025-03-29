@@ -225,7 +225,7 @@ public class Renderer
             _spriteBatch.DrawString(_scoreFont, menuOptions[i], position, color);
         }
 
-        var versionText = "v1.0dev (c) Sascha Dierl 2025";
+        var versionText = "v1.0 (c) Sascha Dierl 2025";
         var versionPosition = new Vector2(
             _graphics.PreferredBackBufferWidth - _scoreFont.MeasureString(versionText).X - 10,
             _graphics.PreferredBackBufferHeight - _scoreFont.MeasureString(versionText).Y - 10);
