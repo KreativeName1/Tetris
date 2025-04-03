@@ -111,34 +111,34 @@ public class Tetris : Game
 
     private void UpdateSelect()
     {
-        if (_inputManager.IsKeyPressed(_controls.MenuLeft))
+        if (_inputManager.IsAnyInputPressed(_controls.MenuLeft, _controls.GamepadMenuLeft))
         {
             selLevel--;
             if (selLevel < 1) selLevel = 1;
         }
-        else if (_inputManager.IsKeyPressed(_controls.MenuRight))
+        else if (_inputManager.IsAnyInputPressed(_controls.MenuRight, _controls.GamepadMenuRight))
         {
             selLevel++;
             if (selLevel > selMaxLevel) selLevel = selMaxLevel;
         }
-        else if (_inputManager.IsKeyPressed(_controls.MenuDown))
+        else if (_inputManager.IsAnyInputPressed(_controls.MenuDown, _controls.GamepadMenuDown))
         {
             selMusic--;
             if (selMusic < _audioManager.MinMusicIndex) selMusic = _audioManager.MinMusicIndex;
         }
-        else if (_inputManager.IsKeyPressed(_controls.MenuUp))
+        else if (_inputManager.IsAnyInputPressed(_controls.MenuUp, _controls.GamepadMenuUp))
         {
             selMusic++;
             if (selMusic > _audioManager.MaxMusicIndex) selMusic = _audioManager.MaxMusicIndex;
         }
 
-        if (_inputManager.IsKeyPressed(_controls.MenuSelect))
+        if (_inputManager.IsAnyInputPressed(_controls.MenuSelect, _controls.GamepadMenuSelect))
         {
             ResetGame();
             _scoreManager.Level = selLevel;
             _currentState = GameState.Game;
         }
-        else if (_inputManager.IsKeyPressed(_controls.MenuBack))
+        else if (_inputManager.IsAnyInputPressed(_controls.MenuBack, _controls.GamepadMenuBack))
         {
             _currentState = GameState.TitleScreen;
         }
@@ -149,19 +149,25 @@ public class Tetris : Game
     private void UpdateTitleScreen()
     {
         _audioManager.PlayBackgroundMusic(1, true);
-        if (_inputManager.IsKeyPressed(_controls.MenuSelect)) _currentState = GameState.Select;
-        else if (_inputManager.IsKeyPressed(_controls.Quit)) Exit();
-        else if (_inputManager.IsKeyPressed(_controls.ShowControls)) _currentState = GameState.Controls;
+        if (_inputManager.IsAnyInputPressed(_controls.MenuSelect, _controls.GamepadMenuSelect)) _currentState = GameState.Select;
+        else if (_inputManager.IsAnyInputPressed(_controls.Quit, _controls.GamepadQuit)) Exit();
+        else if (_inputManager.IsAnyInputPressed(_controls.ShowControls, _controls.GamepadShowControls)) _currentState = GameState.Controls;
     }
 
     private void UpdateGameOver(GameTime gameTime)
+{
+    _audioManager.PlayBackgroundMusic(0, true, false);
+
+    if (isEnteringName)
     {
-        _audioManager.PlayBackgroundMusic(0, true, false);
-
-        _keyPressTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
-
-        if (isEnteringName)
+        if (_inputManager.IsGamePadConnected())
         {
+            HandleGamepadTextInput(gameTime);
+        }
+        else
+        {
+            _keyPressTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
+
             if (_keyPressTimer >= KeyPressCooldown)
             {
                 var pressedKeys = _inputManager.GetPressedKeys();
@@ -181,32 +187,31 @@ public class Tetris : Game
                     }
                     else if (key == Keys.Enter && playerName.Length > 0)
                     {
-                        HighscoreManager.SaveHighscore(new HighscoreData(playerName, _scoreManager.Score,
-                            _scoreManager.Level, _scoreManager.TotalLinesCleared));
-                        isEnteringName = false;
-                        _currentState = GameState.TitleScreen;
-                        _highscoreScrollOffset = 0;
-                        _keyPressTimer = 0f;
+                        SubmitHighscore();
                     }
                 }
             }
         }
-        else
+    }
+    else
+    {
+        _keyPressTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+        if (_keyPressTimer >= KeyPressCooldown)
         {
-            if (_keyPressTimer >= KeyPressCooldown && _inputManager.IsKeyPressed(_controls.MenuBack))
+            if (_inputManager.IsAnyInputPressed(_controls.MenuBack, _controls.GamepadMenuBack))
             {
                 _currentState = GameState.TitleScreen;
                 _highscoreScrollOffset = 0;
                 _keyPressTimer = 0f;
             }
-
-            if (_keyPressTimer >= KeyPressCooldown && _inputManager.IsKeyPressed(_controls.MenuUp) &&
-                _highscoreScrollOffset > 0)
+            else if (_inputManager.IsAnyInputPressed(_controls.MenuUp, _controls.GamepadMenuUp) &&
+                     _highscoreScrollOffset > 0)
             {
                 _highscoreScrollOffset--;
                 _keyPressTimer = 0f;
             }
-            else if (_keyPressTimer >= KeyPressCooldown && _inputManager.IsKeyPressed(_controls.MenuDown) &&
+            else if (_inputManager.IsAnyInputPressed(_controls.MenuDown, _controls.GamepadMenuDown) &&
                      _highscoreScrollOffset < HighscoreManager.LoadHighscores().Count - 5)
             {
                 _highscoreScrollOffset++;
@@ -214,17 +219,28 @@ public class Tetris : Game
             }
         }
     }
+}
+
+private void SubmitHighscore()
+{
+    HighscoreManager.SaveHighscore(new HighscoreData(playerName, _scoreManager.Score,
+        _scoreManager.Level, _scoreManager.TotalLinesCleared));
+    isEnteringName = false;
+    _currentState = GameState.TitleScreen;
+    _highscoreScrollOffset = 0;
+    _keyPressTimer = 0f;
+}
 
     private void UpdatePause()
     {
         if (!_audioManager.IsPaused) _audioManager.Pause();
-        if (_inputManager.IsKeyPressed(_controls.Pause))
+        if (_inputManager.IsAnyInputPressed(_controls.Pause, _controls.GamepadPause))
         {
             _audioManager.PlayPause();
             _audioManager.Resume();
             _currentState = GameState.Game;
         }
-        else if (_inputManager.IsKeyPressed(_controls.MenuBack))
+        else if (_inputManager.IsAnyInputPressed(_controls.MenuBack, _controls.GamepadMenuBack))
         {
             _currentState = GameState.TitleScreen;
         }
@@ -232,7 +248,7 @@ public class Tetris : Game
 
     private void UpdateControls()
     {
-        if (_inputManager.IsKeyPressed(_controls.MenuBack)) _currentState = GameState.TitleScreen;
+        if (_inputManager.IsAnyInputPressed(_controls.MenuBack, _controls.GamepadMenuBack)) _currentState = GameState.TitleScreen;
     }
 
     private void UpdateGame(GameTime gameTime)
@@ -247,25 +263,25 @@ public class Tetris : Game
         // Handle player input
         if (_moveTimer >= MoveCooldown)
         {
-            if (_inputManager.IsKeyDown(_controls.MoveLeft))
+            if (_inputManager.IsAnyInput(_controls.MoveLeft, _controls.GamepadMoveLeft))
             {
                 MoveTetromino(-1, 0);
                 _moveTimer = 0f;
             }
-            else if (_inputManager.IsKeyDown(_controls.MoveRight))
+            else if (_inputManager.IsAnyInput(_controls.MoveRight, _controls.GamepadMoveRight))
             {
                 MoveTetromino(1, 0);
                 _moveTimer = 0f;
             }
 
-            if (_inputManager.IsKeyDown(_controls.SoftDrop))
+            if (_inputManager.IsAnyInput(_controls.SoftDrop, _controls.GamepadSoftDrop))
                 if (MoveTetromino(0, 1))
                 {
                     _timeSinceLastFall = 0;
                     _moveTimer = 0f;
                 }
 
-            if (_inputManager.IsKeyPressed(_controls.HardDrop))
+            if (_inputManager.IsAnyInputPressed(_controls.HardDrop, _controls.GamepadHardDrop))
             {
                 while (MoveTetromino(0, 1))
                 {
@@ -276,18 +292,18 @@ public class Tetris : Game
                 GetNextTeromino();
             }
 
-            if (_inputManager.IsKeyPressed(_controls.HoldPiece)) HoldTetromino();
+            if (_inputManager.IsAnyInputPressed(_controls.HoldPiece, _controls.GamepadHoldPiece)) HoldTetromino();
         }
 
         // Handle rotation
         if (_rotateTimer >= RotateCooldown)
         {
-            if (_inputManager.IsKeyPressed(_controls.RotateClockwise))
+            if (_inputManager.IsAnyInputPressed(_controls.RotateClockwise, _controls.GamepadRotateClockwise))
             {
                 RotateTetromino();
                 _rotateTimer = 0f;
             }
-            else if (_inputManager.IsKeyPressed(_controls.RotateCounterClockwise))
+            else if (_inputManager.IsAnyInputPressed(_controls.RotateCounterClockwise, _controls.GamepadRotateCounterClockwise))
             {
                 RotateTetromino(false);
                 _rotateTimer = 0f;
@@ -305,7 +321,7 @@ public class Tetris : Game
             }
         }
 
-        if (_inputManager.IsKeyPressed(_controls.Pause))
+        if (_inputManager.IsAnyInputPressed(_controls.Pause, _controls.GamepadPause))
         {
             _audioManager.PlayPause();
             _currentState = GameState.Pause;
@@ -334,8 +350,8 @@ public class Tetris : Game
                     highscores.Insert(newHighscoreIndex, newHighscore);
                 }
 
-                _renderer.DrawGameOver(_scoreManager, highscores, newHighscoreIndex, isEnteringName ? playerName : null,
-                    _highscoreScrollOffset);
+                _renderer.DrawGameOver(_scoreManager, highscores, newHighscoreIndex,
+                    isEnteringName ? playerName : null, _highscoreScrollOffset, currentIndex);
                 break;
             case GameState.Pause:
                 _renderer.DrawPause();
@@ -468,4 +484,76 @@ public class Tetris : Game
         _currentState = GameState.Game;
         _audioManager.PlayBackgroundMusic(1);
     }
+    
+    
+    static int currentIndex = 0;
+    const string alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const int gridWidth = 6;
+    const int gridHeight = 5;
+    
+    static int IndexToX(int index) => index % gridWidth;
+    static int IndexToY(int index) => index / gridWidth;
+    static int CoordToIndex(int x, int y) => y * gridWidth + x;
+
+    static int Mod(int a, int b) => (a % b + b) % b;
+    private void HandleGamepadTextInput(GameTime gameTime)
+{
+    
+
+
+    _keyPressTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+    if (_keyPressTimer >= KeyPressCooldown)
+    {
+        int x = IndexToX(currentIndex);
+        int y = IndexToY(currentIndex);
+
+        if (_inputManager.IsAnyInputPressed(_controls.MenuUp, _controls.GamepadMenuUp))
+        {
+            y = Mod(y - 1, gridHeight);
+            _keyPressTimer = 0f;
+        }
+        else if (_inputManager.IsAnyInputPressed(_controls.MenuDown, _controls.GamepadMenuDown))
+        {
+            y = Mod(y + 1, gridHeight);
+            _keyPressTimer = 0f;
+        }
+        else if (_inputManager.IsAnyInputPressed(_controls.MenuLeft, _controls.GamepadMenuLeft))
+        {
+            x = Mod(x - 1, gridWidth);
+            _keyPressTimer = 0f;
+        }
+        else if (_inputManager.IsAnyInputPressed(_controls.MenuRight, _controls.GamepadMenuRight))
+        {
+            x = Mod(x + 1, gridWidth);
+            _keyPressTimer = 0f;
+        }
+        else if (_inputManager.IsAnyInputPressed(_controls.MenuSelect, _controls.GamepadMenuSelect))
+        {
+            if (currentIndex < alphabet.Length && playerName.Length < 10)
+            {
+                playerName += alphabet[currentIndex];
+            }
+            else if (currentIndex == alphabet.Length) // Backspace
+            {
+                if (playerName.Length > 0)
+                    playerName = playerName.Substring(0, playerName.Length - 1);
+            }
+            else if (currentIndex == alphabet.Length + 1) // Enter
+            {
+                if (playerName.Length > 0)
+                {
+                    HighscoreManager.SaveHighscore(new HighscoreData(playerName, _scoreManager.Score,
+                        _scoreManager.Level, _scoreManager.TotalLinesCleared));
+                    isEnteringName = false;
+                    _currentState = GameState.TitleScreen;
+                    _highscoreScrollOffset = 0;
+                }
+            }
+            _keyPressTimer = 0f;
+        }
+
+        currentIndex = CoordToIndex(x, y);
+    }
+}
 }
