@@ -74,8 +74,9 @@ public class Tetromino
 
     public static List<Tetromino> ReadFromJSON()
     {
+        if (!File.Exists(Tetris.DataDir + "/blocks.json")) CreateFile();
         List<JSONBlock> list;
-        list = JsonConvert.DeserializeObject<List<JSONBlock>>(File.ReadAllText("blocks.json"));
+        list = JsonConvert.DeserializeObject<List<JSONBlock>>(File.ReadAllText(Tetris.DataDir+"/blocks.json"));
         var blockListe = new List<Tetromino>();
 
         foreach (var JBlock in list)
@@ -87,5 +88,50 @@ public class Tetromino
     {
         public int[] Color;
         public int[,] Layout;
+    }
+    
+    public static void CreateFile()
+    {
+        var blocks = new List<JSONBlock>
+        {
+            new JSONBlock
+            {
+                Color = new[] { 90, 101, 173 },
+                Layout = new[,] { { 1, 0, 0 }, { 1, 1, 1 } }
+            },
+            new JSONBlock
+            {
+                Color = new[] { 239, 121, 33 },
+                Layout = new[,] { { 0, 0, 1 }, { 1, 1, 1 } }
+            },
+            new JSONBlock
+            {
+                Color = new[] { 247, 211, 8 },
+                Layout = new[,] { { 1, 1 }, { 1, 1 } }
+            },
+            new JSONBlock
+            {
+                Color = new[] { 239, 32, 41 },
+                Layout = new[,] { { 1, 1, 0 }, { 0, 1, 1 } }
+            },
+            new JSONBlock
+            {
+                Color = new[] { 173, 77, 156 },
+                Layout = new[,] { { 0, 1, 0 }, { 1, 1, 1 } }
+            },
+            new JSONBlock
+            {
+                Color = new[] { 66, 182, 66 },
+                Layout = new[,] { { 0, 1, 1 }, { 1, 1, 0 } }
+            },
+            new JSONBlock
+            {
+                Color = new[] { 49, 199, 239 },
+                Layout = new[,] { { 1, 1, 1, 1 } }
+            }
+        };
+
+        var json = JsonConvert.SerializeObject(blocks, Formatting.Indented);
+        File.WriteAllText(Tetris.DataDir + "/blocks.json", json);
     }
 }

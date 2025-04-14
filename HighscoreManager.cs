@@ -11,7 +11,7 @@ namespace Tetris;
 public static class HighscoreManager
 {
     private const int MaxHighscores = 10;
-    private static readonly string FilePath = @"./game.dat";
+    private static readonly string FilePath = $@"{Tetris.DataDir}/score.dat";
 
     private static readonly string EncryptionKey = "MySecretKey123456";
 

@@ -44,6 +44,8 @@ public class Tetris : Game
 
 
     private double speed = 0.5;
+    
+    public static string DataDir = "./data";
 
     public Tetris()
     {
@@ -62,7 +64,7 @@ public class Tetris : Game
         _scoreManager = new ScoreManager();
         _inputManager = new InputManager();
         _audioManager = new AudioManager();
-        _controls = new Controls();
+        _controls = new Controls(DataDir + "/controls.json");
         _renderer = new Renderer(GraphicsDevice, _graphics, _controls);
         _random = new Random();
 
