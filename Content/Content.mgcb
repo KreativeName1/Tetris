@@ -55,6 +55,24 @@
 /processorParam:Quality=Best
 /build:music/theme_d.mp3
 
+#begin music/theme_e.mp3
+/importer:Mp3Importer
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:music/theme_e.mp3
+
+#begin music/theme_f.mp3
+/importer:Mp3Importer
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:music/theme_f.mp3
+
+#begin music/theme_g.mp3
+/importer:Mp3Importer
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:music/theme_g.mp3
+
 #begin music/title.mp3
 /importer:Mp3Importer
 /processor:SongProcessor

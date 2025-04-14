@@ -39,7 +39,10 @@ public class AudioManager
             content.Load<Song>("music/theme_a"),
             content.Load<Song>("music/theme_b"),
             content.Load<Song>("music/theme_c"),
-            content.Load<Song>("music/theme_d")
+            content.Load<Song>("music/theme_d"),
+            content.Load<Song>("music/theme_e"),
+            content.Load<Song>("music/theme_f"),
+            content.Load<Song>("music/theme_g")
         };
 
         MaxMusicIndex = MusicList.Count - 1;
